@@ -17,6 +17,7 @@ spec:
       containers:
         - name: backend
           image: placeholder:latest  # Will be replaced by workflow
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000  #tells Kubernetes what port your container listens on internally.
           resources: #Helps Kubernetes schedule pods and avoid overconsumption
