@@ -16,16 +16,26 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          # Use a token with push permissions
+          token: ${{ secrets.REPO_PAT }}
 
         # This is the step that **changes the Docker image in the Deployment YAML**
         # It does NOT deploy anything to Minikube yet
         # It only edits the YAML in the local repo clone
       - name: Update backend deployment image  
+        # run: |
+        #   IMAGE_TAG=${{ github.event.inputs.version_tag }}
+        #   echo "Updating backend deployment to image $IMAGE_TAG"
+        #   # Update the image in your backend deployment YAML
+        #   sed -i "s|image: .*|image: $IMAGE_TAG|g" minikube/backend-deployment.yaml
         run: |
           IMAGE_TAG=${{ github.event.inputs.version_tag }}
           echo "Updating backend deployment to image $IMAGE_TAG"
-          # Update the image in your backend deployment YAML
-          sed -i "s|image: .*|image: $IMAGE_TAG|g" minikube/backend-deployment.yaml
+          # Create a new file for each version to avoid overwriting
+          NEW_FILE="minikube/backend-deployment-${IMAGE_TAG}.yaml"
+          sed "s|image: .*|image: $IMAGE_TAG|g" minikube/backend-deployment.yaml > $NEW_FILE
+          echo "Created new deployment file: $NEW_FILE"
 
         # This pushes the updated deployment YAML back to GitHub
         # This is the **trigger point for ArgoCD**

@@ -16,16 +16,27 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          # Use a token with push permissions
+          token: ${{ secrets.REPO_PAT }}
 
         # This is the step that **changes the Docker image in the Deployment YAML**
         # It does NOT deploy anything to Minikube yet
         # It only edits the YAML in the local repo clone
       - name: Update frontend deployment image
+        # run: |
+        #   IMAGE_TAG=${{ github.event.inputs.version_tag }}
+        #   echo "Updating frontend deployment to image $IMAGE_TAG"
+        #   # Update the image in your frontend deployment YAML
+        #   sed -i "s|image: .*|image: $IMAGE_TAG|g" minikube/frontend-deployment.yaml
         run: |
           IMAGE_TAG=${{ github.event.inputs.version_tag }}
           echo "Updating frontend deployment to image $IMAGE_TAG"
-          # Update the image in your frontend deployment YAML
-          sed -i "s|image: .*|image: $IMAGE_TAG|g" minikube/frontend-deployment.yaml
+          # Create a new file for each version to avoid overwriting
+          NEW_FILE="minikube/frontend-deployment-${IMAGE_TAG}.yaml"
+          sed "s|image: .*|image: $IMAGE_TAG|g" minikube/frontend-deployment.yaml > $NEW_FILE
+          echo "Created new deployment file: $NEW_FILE"
+
 
         # This pushes the updated deployment YAML back to GitHub
         # This is the **trigger point for ArgoCD**
@@ -41,6 +52,6 @@ jobs:
 
 # ArgoCD (outside of GitHub Actions)
 # ArgoCD continuously monitors minikube_deployments repo.
-# When it sees that backend-deployment.yaml has changed (new image tag),
+# When it sees that frontend-deployment.yaml has changed (new image tag),
 # it automatically syncs the deployment to Minikube.
 # This step is **automatic** and happens outside of this workflow.
