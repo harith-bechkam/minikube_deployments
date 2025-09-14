@@ -1,0 +1,46 @@
+name: Deploy Frontend
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Docker image tag'
+        required: true
+      commit_message:
+        description: 'Commit message'
+        required: true
+
+jobs:
+  update-frontend-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+        # This is the step that **changes the Docker image in the Deployment YAML**
+        # It does NOT deploy anything to Minikube yet
+        # It only edits the YAML in the local repo clone
+      - name: Update frontend deployment image
+        run: |
+          IMAGE_TAG=${{ github.event.inputs.version_tag }}
+          echo "Updating frontend deployment to image $IMAGE_TAG"
+          # Update the image in your frontend deployment YAML
+          sed -i "s|image: .*|image: $IMAGE_TAG|g" k8s/frontend-deployment.yaml
+
+        # This pushes the updated deployment YAML back to GitHub
+        # This is the **trigger point for ArgoCD**
+        # Once the YAML is pushed, ArgoCD sees the new image tag in the repo
+      - name: Commit & push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add k8s/frontend-deployment.yaml
+          git commit -m "${{ github.event.inputs.commit_message }} [ci skip]" || echo "No changes to commit"
+          git push origin main
+
+
+# ArgoCD (outside of GitHub Actions)
+# ArgoCD continuously monitors minikube_deployments repo.
+# When it sees that backend-deployment.yaml has changed (new image tag),
+# it automatically syncs the deployment to Minikube.
+# This step is **automatic** and happens outside of this workflow.
