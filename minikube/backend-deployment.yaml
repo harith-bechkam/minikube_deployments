@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: placeholder:latest
+          image: harith47/platform:12a3a17-backend
           imagePullPolicy: Always
           ports:
             - containerPort: 5000  # tells Kubernetes what port your container listens on internally.
