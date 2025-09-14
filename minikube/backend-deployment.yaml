@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  replicas: 2  # Number of pods
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: placeholder:latest  # Will be replaced by workflow
+          ports:
+            - containerPort: 5000  #tells Kubernetes what port your container listens on internally.
+          resources: #Helps Kubernetes schedule pods and avoid overconsumption
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          env: #kept for sample - we can use multiple envs also but no need all envs are bundled with image itself
+            - name: NODE_ENV
+              value: production
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 80     # Service port - backend-service exposes port 80(External clients will use this port)
+      targetPort: 5000  # Container port - external service routes to container's port 5000
+      nodePort: 30080  # NodePort for Minikube external access
+  type: NodePort 
+
+
+
+
+# final url - http://<minikube-ip>:30080
+
+# | Field                | Meaning                                                       |
+# | -------------------- | ------------------------------------------------------------- |
+# | `containerPort`      | Port inside the container (your app listens here)             |
+# | `targetPort`         | Port on the container the Service should forward traffic to   |
+# | `port`               | Port exposed by the Service inside the cluster                |
+# | `protocol`           | TCP/UDP (usually TCP)                                         |
+# | `type: ClusterIP`    | Service accessible **only inside cluster**                    |
+# | `type: NodePort`     | Exposed externally on all nodes via a high port (30000–32767) |
+# | `type: LoadBalancer` | Exposed externally via cloud provider load balancer           |

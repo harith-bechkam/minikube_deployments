@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 2  # Number of pods
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: placeholder:latest  # Will be replaced by workflow
+          ports:
+            - containerPort: 3000  # Container listens on port 3000
+          resources:  # Helps Kubernetes schedule pods and avoid overconsumption
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          env:  # Optional, can be overridden if needed
+            - name: NODE_ENV
+              value: production
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80       # Service port - external clients will use this port
+      targetPort: 3000  # Container port - frontend container listens here
+      nodePort: 30030   # NodePort for Minikube external access
+  type: NodePort
+
+# final url - http://<minikube-ip>:30030
+
