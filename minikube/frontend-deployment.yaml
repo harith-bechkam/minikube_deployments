@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: harith47/platform:d4d7332-frontend
+          image: harith47/platform:b1a849c-frontend
           imagePullPolicy: Always
           ports:
             - containerPort: 3000  # Container listens on port 3000
