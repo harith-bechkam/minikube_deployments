@@ -25,7 +25,7 @@ jobs:
           IMAGE_TAG=${{ github.event.inputs.version_tag }}
           echo "Updating frontend deployment to image $IMAGE_TAG"
           # Update the image in your frontend deployment YAML
-          sed -i "s|image: .*|image: $IMAGE_TAG|g" k8s/frontend-deployment.yaml
+          sed -i "s|image: .*|image: $IMAGE_TAG|g" minikube/frontend-deployment.yaml
 
         # This pushes the updated deployment YAML back to GitHub
         # This is the **trigger point for ArgoCD**
@@ -34,7 +34,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add k8s/frontend-deployment.yaml
+          git add minikube/frontend-deployment.yaml
           git commit -m "${{ github.event.inputs.commit_message }} [ci skip]" || echo "No changes to commit"
           git push origin main
 
