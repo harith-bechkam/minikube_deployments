@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: placeholder:latest  # Will be replaced by workflow
+          image: harith47/platform:d32d07a-frontend
           ports:
             - containerPort: 3000  # Container listens on port 3000
           resources:  # Helps Kubernetes schedule pods and avoid overconsumption
