@@ -16,10 +16,10 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: harith47/platform:d4d7332-frontend
+          image: placeholder:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 3000  # Container listens on port 3000
+            - containerPort: 80  # Container listens on port 3000
           resources:  # Helps Kubernetes schedule pods and avoid overconsumption
             requests:
               memory: "128Mi"
@@ -38,12 +38,16 @@ metadata:
 spec:
   selector:
     app: frontend
+  # ports:
+  #   - protocol: TCP
+  #     port: 3000       # Service port - external clients will use this port
+  #     targetPort: 3000  # Container port - frontend container listens here
+  #     nodePort: 30030   # NodePort for Minikube external access
+  # type: NodePort
   ports:
     - protocol: TCP
-      port: 80       # Service port - external clients will use this port
-      targetPort: 3000  # Container port - frontend container listens here
-      nodePort: 30030   # NodePort for Minikube external access
-  type: NodePort
+      port: 80        # Service port (Ingress will use 80)
+      targetPort: 80  # Container port
+  type: ClusterIP  # NodePort not needed; Ingress exposes externally
 
 # final url - http://<minikube-ip>:30030
-

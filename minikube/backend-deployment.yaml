@@ -16,18 +16,18 @@ spec:
     spec:
       containers:
         - name: backend
-          image: harith47/platform:d4d7332-backend
+          image: placeholder:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 5000  #tells Kubernetes what port your container listens on internally.
-          resources: #Helps Kubernetes schedule pods and avoid overconsumption
+            - containerPort: 5000  # tells Kubernetes what port your container listens on internally.
+          resources: # Helps Kubernetes schedule pods and avoid overconsumption
             requests:
               memory: "128Mi"
               cpu: "250m"
             limits:
               memory: "256Mi"
               cpu: "500m"
-          env: #kept for sample - we can use multiple envs also but no need all envs are bundled with image itself
+          env: # kept for sample - we can use multiple envs also but no need all envs are bundled with image itself
             - name: NODE_ENV
               value: production
 ---
@@ -38,15 +38,17 @@ metadata:
 spec:
   selector:
     app: backend
+  # ports:
+  #   - protocol: TCP
+  #     port: 5000  # Service port - backend-service exposes port 80 (External clients will use this port)
+  #     targetPort: 5000  # Container port - external service routes to container's port 5000
+  #     nodePort: 30080  # NodePort for Minikube external access
+  # type: NodePort 
   ports:
     - protocol: TCP
-      port: 80     # Service port - backend-service exposes port 80(External clients will use this port)
-      targetPort: 5000  # Container port - external service routes to container's port 5000
-      nodePort: 30080  # NodePort for Minikube external access
-  type: NodePort 
-
-
-
+      port: 5000  # Service port (Ingress will use this)
+      targetPort: 5000  # Container port
+  type: ClusterIP
 
 # final url - http://<minikube-ip>:30080
 
