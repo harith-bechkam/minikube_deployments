@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-app
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: 'https://github.com/harith-bechkam/minikube_deployments.git'
+    targetRevision: HEAD
+    path: minikube   # folder inside repo with your k8s yamls
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: default   # deploy into default namespace
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true   # harmless even if using default
+    automated:
+      prune: true
+      selfHeal: true
